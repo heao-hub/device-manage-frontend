@@ -14,8 +14,8 @@ export const updateUser = (data) => request.put('/user', data);
 export const getUserById = (id) => request.get(`/user/${id}`);
 // 退出登录
 export const logout = () => request.post('/user/logout');
-// 查询所有单位
-export const getAllDepts = () => request.get('/user/dept');
+// 查询所有部门（用于下拉框）
+export const getUserDept = () => request.get('/user/dept');
 
 export default {
 	login,
@@ -25,5 +25,5 @@ export default {
 	updateUser,
 	getUserById,
 	logout,
-	getAllDepts
+	getUserDept
 };

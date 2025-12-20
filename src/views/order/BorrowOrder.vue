@@ -11,9 +11,9 @@
         <el-button type="primary" @click="fetchOrders">查询</el-button>
       </div>
       <el-table :data="orders" border stripe style="width:100%" @row-dblclick="openDetail">
-        <el-table-column prop="id" label="ID" width="60" />
+        <el-table-column prop="code" label="编号" width="120" />
         <el-table-column prop="code" label="借条编号" />
-        <el-table-column prop="username" label="申请人" />
+        <el-table-column prop="userName" label="申请人" />
         <el-table-column prop="status" label="状态" :formatter="statusFmt" />
         <el-table-column prop="createTime" label="申请时间" />
         <el-table-column prop="handleTime" label="审批时间" />

@@ -13,7 +13,7 @@
         <el-button type="success" @click="openAdd">设备入库</el-button>
       </div>
       <el-table :data="devices" border stripe style="width:100%">
-        <el-table-column prop="id" label="ID" width="60" />
+        <el-table-column prop="code" label="编号" width="120" />
         <el-table-column prop="deviceName" label="设备名称" />
         <el-table-column prop="deviceModel" label="型号" />
         <el-table-column prop="status" label="状态" :formatter="statusFmt" />
@@ -60,7 +60,7 @@
         </el-form-item>
         <el-form-item label="所属单位" prop="deptId">
           <el-select v-model="form.deptId">
-            <el-option v-for="dept in depts" :key="dept.id" :label="dept.deptName" :value="dept.id" />
+            <el-option v-for="dept in depts" :key="dept.id" :label="dept.code + ' - ' + dept.name" :value="dept.id" />
           </el-select>
         </el-form-item>
       </el-form>

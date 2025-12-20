@@ -41,7 +41,7 @@ const onLogin = () => {
           localStorage.setItem('app_token', res.data.data.token)
           await Promise.resolve() // 确保 token 写入完成
           const userRes = await getUserById(res.data.data.id)
-          localStorage.setItem('user_info', JSON.stringify(userRes.data))
+          localStorage.setItem('user_info', JSON.stringify(userRes.data.data))
           ElMessage.success('登录成功')
           router.push('/')
         } else {

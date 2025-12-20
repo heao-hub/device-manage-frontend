@@ -4,13 +4,13 @@
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
         <el-input v-model="searchForm.username" placeholder="用户名" clearable style="width:180px" />
         <el-select v-model="searchForm.deptId" placeholder="所属单位" clearable style="width:180px">
-          <el-option v-for="dept in depts" :key="dept.id" :label="dept.deptName" :value="dept.id" />
+          <el-option v-for="dept in depts" :key="dept.id" :label="dept.code + ' - ' + dept.name" :value="dept.id" />
         </el-select>
         <el-button type="primary" @click="fetchUsers">查询</el-button>
         <el-button type="success" @click="openAdd">添加用户</el-button>
       </div>
       <el-table :data="users" border stripe style="width:100%">
-        <el-table-column prop="id" label="ID" width="60" />
+        <el-table-column prop="code" label="编号" width="120" />
         <el-table-column prop="username" label="用户名" />
         <el-table-column prop="type" label="类型" :formatter="typeFmt" />
         <el-table-column prop="deptName" label="所属单位" />
@@ -50,7 +50,7 @@
         </el-form-item>
         <el-form-item label="所属单位" prop="deptId">
           <el-select v-model="form.deptId">
-            <el-option v-for="dept in depts" :key="dept.id" :label="dept.deptName" :value="dept.id" />
+            <el-option v-for="dept in depts" :key="dept.id" :label="dept.code + ' - ' + dept.name" :value="dept.id" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -65,7 +65,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { getUserPage, addUser, updateUser, deleteUser, getUserById, getAllDepts } from '../../api/user';
+import { getUserPage, addUser, updateUser, deleteUser, getUserById, getUserDept } from '../../api/user';
 
 const users = ref([]);
 const page = reactive({ page: 1, pageSize: 10, total: 0 });
@@ -82,7 +82,7 @@ const fetchUsers = async () => {
 };
 
 const fetchDepts = async () => {
-  const res = await getAllDepts();
+  const res = await getUserDept();
   if (res.data && res.data.code === 1) {
     depts.value = res.data.data.records || [];
   }

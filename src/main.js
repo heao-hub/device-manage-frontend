@@ -1,3 +1,4 @@
+localStorage.clear();
 
 import { CanvasRenderer } from 'echarts/renderers'
 import * as echarts from 'echarts'
