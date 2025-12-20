@@ -6,12 +6,12 @@
         <el-button type="primary" @click="fetchOrders">查询</el-button>
       </div>
       <el-table :data="orders" border stripe style="width:100%">
-        <el-table-column prop="code" label="编号" width="120" />
-        <el-table-column prop="code" label="报废单编号" />
+        <el-table-column prop="code" label="报废单编号" width="150" />
+        <el-table-column prop="deviceCode" label="设备编号" width="150" />
         <el-table-column prop="deviceName" label="设备名称" />
         <el-table-column prop="deviceModel" label="型号" />
         <el-table-column prop="reason" label="报废原因" />
-        <el-table-column prop="createTime" label="报废时间" />
+        <el-table-column prop="createTime" label="报废时间" width="180" />
         <el-table-column prop="adminName" label="处理人" />
       </el-table>
       <el-pagination

@@ -13,7 +13,7 @@
         <el-table-column prop="count" label="数量" />
         <el-table-column prop="price" label="价格" />
         <el-table-column prop="manufacturer" label="厂商" />
-        <el-table-column prop="deptName" label="采购单位" />
+        <el-table-column prop="deptName" label="所属单位" />
         <el-table-column prop="createTime" label="入库时间" />
         <el-table-column prop="adminName" label="处理人" />
       </el-table>

@@ -60,7 +60,7 @@ const onLogin = () => {
         router.replace('/')
       } else {
         console.log('Login failed, response data:', res.data);
-        ElMessage.error(res.data.msg || '登录失败')
+        ElMessage.error(res.data.msg || '登录失败 ')
       }
     } catch (e) {
       console.error('Login error:', e);

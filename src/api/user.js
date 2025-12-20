@@ -10,6 +10,8 @@ export const deleteUser = (id) => request.delete('/user', { params: { id } });
 export const addUser = (data) => request.post('/user', data);
 // 修改用户
 export const updateUser = (data) => request.put('/user', data);
+// 修改用户密码
+export const updatePassword = (data) => request.put('/user/password', data);
 // 根据id查询用户信息
 export const getUserById = (id) => request.get(`/user/${id}`);
 // 退出登录
@@ -23,6 +25,7 @@ export default {
 	deleteUser,
 	addUser,
 	updateUser,
+	updatePassword,
 	getUserById,
 	logout,
 	getUserDept

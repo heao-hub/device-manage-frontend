@@ -11,6 +11,7 @@
       <el-icon><UserFilled /></el-icon>
       <span>用户管理</span>
     </el-menu-item>
+  
     <!-- 三、设备管理 -->
     <el-menu-item index="/device" v-if="userType === 1">
       <el-icon><Cpu /></el-icon>
