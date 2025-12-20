@@ -89,7 +89,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getDevicePage, addDevice, updateDevice, getDeviceById, scrapDevice } from '../../api/device';
-import { getAllDepts } from '../../api/user';
+import { getUserDept } from '../../api/user';
 
 const devices = ref([]);
 const page = reactive({ page: 1, pageSize: 10, total: 0 });
@@ -106,7 +106,7 @@ const fetchDevices = async () => {
 };
 
 const fetchDepts = async () => {
-  const res = await getAllDepts();
+  const res = await getUserDept();
   if (res.data && res.data.code === 1) {
     depts.value = res.data.data.records || [];
   }

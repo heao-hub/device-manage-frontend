@@ -48,15 +48,49 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('app_token');
   const userInfo = localStorage.getItem('user_info');
-  if (to.meta.public) return next();
-  if (!token) return next('/login');
-  if (to.meta.roles && userInfo) {
-    const user = JSON.parse(userInfo);
-    if (!to.meta.roles.includes(user.type)) {
-      return next('/');
+  
+  console.log('Routing guard triggered:', { to: to.path, from: from.path, token, userInfo });
+  
+  // 如果访问的是公共页面，直接放行
+  if (to.meta && to.meta.public) {
+    console.log('Public route, allowing access');
+    return next();
+  }
+  
+  // 如果没有token，重定向到登录页
+  if (!token) {
+    console.log('No token found, redirecting to login');
+    return next('/login');
+  }
+  
+  // 检查权限角色
+  if (to.meta && to.meta.roles && userInfo) {
+    try {
+      const user = JSON.parse(userInfo);
+      console.log('Checking role permissions:', { requiredRoles: to.meta.roles, userRole: user.type });
+      if (!to.meta.roles.includes(user.type)) {
+        console.log('Insufficient permissions, redirecting to login');
+        return next('/login');
+      }
+    } catch (e) {
+      console.error('Error parsing user info:', e);
+      // 如果解析用户信息出错，重定向到登录页
+      return next('/login');
     }
   }
+  
+  console.log('Access granted');
   next();
+});
+
+// 全局后置钩子，页面滚动到顶部
+router.afterEach((to, from) => {
+  // 设置页面标题
+  if (to.meta.title) {
+    document.title = to.meta.title;
+  }
+  // 滚动到顶部
+  window.scrollTo(0, 0);
 });
 
 export default router;

@@ -36,18 +36,34 @@ const onLogin = () => {
   formRef.value.validate(async (valid) => {
     if (!valid) return
     try {
+      console.log('Attempting login with:', form.value);
       const res = await apiLogin(form.value)
-        if (res.data.code === 1) {
-          localStorage.setItem('app_token', res.data.data.token)
-          await Promise.resolve() // 确保 token 写入完成
-          const userRes = await getUserById(res.data.data.id)
-          localStorage.setItem('user_info', JSON.stringify(userRes.data.data))
-          ElMessage.success('登录成功')
-          router.push('/')
-        } else {
-          ElMessage.error(res.data.msg || '登录失败')
-        }
+      console.log('Login response:', res);
+      
+      if (res.data && res.data.code === 1) { // 1 表示成功
+        console.log('Login successful, response data:', res.data);
+        
+        // 先存储token
+        localStorage.setItem('app_token', res.data.data.token)
+        
+        // 获取用户信息并存储
+        const userRes = await getUserById(res.data.data.id)
+        console.log('User info response:', userRes);
+        localStorage.setItem('user_info', JSON.stringify(userRes.data.data))
+        
+        // 确保数据写入完成
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        ElMessage.success('登录成功')
+        
+        // 使用replace而不是push，避免浏览器后退按钮返回到登录页
+        router.replace('/')
+      } else {
+        console.log('Login failed, response data:', res.data);
+        ElMessage.error(res.data.msg || '登录失败')
+      }
     } catch (e) {
+      console.error('Login error:', e);
       ElMessage.error(e.msg || '登录异常')
     }
   })
