@@ -22,6 +22,7 @@
         v-loading="loading"
         element-loading-text="加载中..."
       >
+        <el-table-column prop="borrowCode" label="借条编号" />
         <el-table-column prop="deviceCode" label="设备编号" width="150" />
         <el-table-column prop="deviceName" label="设备名称" />
         <el-table-column prop="deviceModel" label="型号" />

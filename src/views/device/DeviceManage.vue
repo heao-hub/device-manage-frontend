@@ -52,7 +52,11 @@
         <el-table-column prop="code" label="设备编号" width="150" />
         <el-table-column prop="deviceName" label="设备名称" />
         <el-table-column prop="deviceModel" label="型号" />
-        <el-table-column prop="status" label="状态" :formatter="statusFmt" width="120" />
+        <el-table-column prop="status" label="状态" width="120">
+          <template #default="{row}">
+            <el-tag :type="getStatusTagType(row.status)">{{ statusFmt(row) }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="price" label="单价(元)" width="100" />
         <el-table-column prop="manufacturer" label="厂商" />
         <el-table-column prop="deptName" label="所属单位" />
@@ -307,6 +311,16 @@ function statusFmt(row) {
     case 3: return '维修中';
     case 4: return '报废';
     default: return '-';
+  }
+}
+
+function getStatusTagType(status) {
+  switch (status) {
+    case 1: return 'success'; // 正常可用 - 绿色
+    case 2: return 'warning'; // 借出 - 橙色
+    case 3: return 'info';    // 维修中 - 蓝色
+    case 4: return 'danger';  // 报废 - 红色
+    default: return 'info';   // 默认 - 灰色
   }
 }
 

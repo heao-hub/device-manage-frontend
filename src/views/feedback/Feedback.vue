@@ -55,7 +55,11 @@
         <el-table-column prop="deviceName" label="设备名称" />
         <el-table-column prop="deviceModel" label="型号" />
         <el-table-column prop="deviceProblem" label="问题描述" />
-        <el-table-column prop="status" label="状态" :formatter="statusFmt" width="120" />
+        <el-table-column prop="status" label="状态" width="120">
+          <template #default="{row}">
+            <el-tag :type="getStatusTagType(row.status)">{{ statusFmt(row) }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="createTime" label="反馈时间" width="180" />
         <el-table-column prop="handleTime" label="处理时间" width="180" />
       </el-table>
@@ -280,6 +284,16 @@ function statusFmt(row) {
     case 3: return '维修';
     case 4: return '报废';
     default: return '-';
+  }
+}
+
+function getStatusTagType(status) {
+  switch (status) {
+    case 1: return 'warning'; // 未处理 - 橙色
+    case 2: return 'success'; // 已处理 - 绿色
+    case 3: return 'info';    // 维修 - 蓝色
+    case 4: return 'danger';  // 报废 - 红色
+    default: return 'info';   // 默认 - 灰色
   }
 }
 

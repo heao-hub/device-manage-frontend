@@ -141,7 +141,7 @@ const pieOption = ref({});
               },
               data: [
                 { value: d.onUseDeviceCount, name: '正常可用' },
-                { value: d.outUserDeviceCount, name: '借出未归还' },
+                { value: d.outUseDeviceCount, name: '借出未归还' },
                 { value: d.repairDeviceCount, name: '维修中' },
                 { value: d.scrapDeviceCount, name: '报废' },
               ],

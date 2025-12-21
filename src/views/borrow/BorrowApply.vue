@@ -52,9 +52,18 @@
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="code" label="借条编号" width="150" />
         <el-table-column prop="description" label="借用说明" />
-        <el-table-column prop="status" label="状态" :formatter="statusFmt" width="120" />
+        <el-table-column prop="status" label="状态" width="120">
+          <template #default="{row}">
+            <el-tag :type="getStatusTagType(row.status)">{{ statusFmt(row) }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="createTime" label="申请时间" width="180" />
         <el-table-column prop="handleTime" label="审批时间" width="180" />
+        <el-table-column label="操作" width="120" fixed="right">
+          <template #default="{row}">
+            <el-button size="small" @click="viewDetail(row)">详情</el-button>
+          </template>
+        </el-table-column>
       </el-table>
       
       <div class="pagination-container">
@@ -209,13 +218,42 @@
         </div>
       </template>
     </el-dialog>
+    
+    <!-- 详情弹窗 -->
+    <el-dialog 
+      title="借条详情" 
+      v-model="detailDialogVisible" 
+      width="600px"
+    >
+      <el-descriptions :column="1" border>
+        <el-descriptions-item label="借条编号">{{detailData.code}}</el-descriptions-item>
+        <el-descriptions-item label="借用说明">{{detailData.description}}</el-descriptions-item>
+        <el-descriptions-item label="状态">{{statusFmt(detailData)}}</el-descriptions-item>
+        <el-descriptions-item label="申请时间">{{detailData.createTime}}</el-descriptions-item>
+        <el-descriptions-item label="审批时间">{{detailData.handleTime}}</el-descriptions-item>
+      </el-descriptions>
+      
+      <el-card style="margin-top: 20px;" v-if="detailDevices.length > 0">
+        <template #header>
+          <span>借用设备列表</span>
+        </template>
+        <el-table :data="detailDevices" border stripe>
+          <el-table-column prop="code" label="设备编号" />
+          <el-table-column prop="deviceName" label="设备名称" />
+        </el-table>
+      </el-card>
+      
+      <div v-else style="margin-top: 20px; text-align: center; color: #909399;">
+        暂无设备信息
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { getUserBorrowOrders, borrowDevices } from '../../api/borrow';
+import { getUserBorrowOrders, borrowDevices, getBorrowOrderDevices } from '../../api/borrow';
 import { getDevicePage } from '../../api/device';
 
 // 引入图标
@@ -227,6 +265,11 @@ const submitLoading = ref(false);
 const deviceLoading = ref(false);
 const page = reactive({ page: 1, pageSize: 10, total: 0 });
 const searchForm = reactive({ status: null, timeRange: [] });
+
+// 详情弹窗相关
+const detailDialogVisible = ref(false);
+const detailData = ref({});
+const detailDevices = ref([]);
 
 const fetchOrders = async () => {
   loading.value = true;
@@ -283,6 +326,36 @@ function statusFmt(row) {
     case 3: return '审核不通过';
     default: return '-';
   }
+}
+
+function getStatusTagType(status) {
+  switch (status) {
+    case 1: return 'warning'; // 待审核 - 橙色
+    case 2: return 'success'; // 审核通过 - 绿色
+    case 3: return 'danger';  // 审核不通过 - 红色
+    default: return 'info';   // 默认 - 灰色
+  }
+}
+
+// 查看详情
+async function viewDetail(row) {
+  detailData.value = { ...row };
+  
+  // 获取借条下的设备信息
+  try {
+    const res = await getBorrowOrderDevices(row.id);
+    if (res.data && res.data.code === 1) {
+      // API返回的是分页数据结构 {total: x, records: [...]}
+      detailDevices.value = res.data.data?.records || [];
+    } else {
+      detailDevices.value = [];
+    }
+  } catch (error) {
+    ElMessage.error('获取设备信息失败');
+    detailDevices.value = [];
+  }
+  
+  detailDialogVisible.value = true;
 }
 
 function getUserId() {
