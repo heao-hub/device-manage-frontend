@@ -51,7 +51,7 @@
         v-loading="loading"
         element-loading-text="加载中..."
       >
-        <el-table-column prop="code" label="编号" width="120" />
+        <el-table-column prop="code" label="编号" width="160" />
         <el-table-column prop="username" label="用户名" />
         <el-table-column prop="type" label="类型" :formatter="typeFmt" width="120" />
         <el-table-column prop="deptName" label="所属单位" />

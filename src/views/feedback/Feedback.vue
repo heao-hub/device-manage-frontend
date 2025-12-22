@@ -51,7 +51,8 @@
         v-loading="loading"
         element-loading-text="加载中..."
       >
-        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="code" label="反馈单编号" width="160" />
+        <el-table-column prop="deviceCode" label="设备编号" width="160" />
         <el-table-column prop="deviceName" label="设备名称" />
         <el-table-column prop="deviceModel" label="型号" />
         <el-table-column prop="deviceProblem" label="问题描述" />
