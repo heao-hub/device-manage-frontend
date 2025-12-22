@@ -6,7 +6,7 @@
         <el-button type="primary" @click="fetchOrders">查询</el-button>
       </div>
       <el-table :data="orders" border stripe style="width:100%">
-        <el-table-column prop="code" label="编号" width="120" />
+
         <el-table-column prop="code" label="入库单编号" />
         <el-table-column prop="deviceName" label="设备名称" />
         <el-table-column prop="deviceModel" label="型号" />

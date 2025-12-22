@@ -13,6 +13,7 @@
       </div>
       <el-table :data="orders" border stripe style="width:100%">
         <el-table-column prop="code" label="编号" width="160" />
+        <el-table-column prop="deviceCode" label="设备编号" width="160" />
         <el-table-column prop="deviceName" label="设备名称" />
         <el-table-column prop="deviceModel" label="型号" />
         <el-table-column prop="deviceProblem" label="问题描述" />
@@ -43,9 +44,11 @@
     <!-- 处理弹窗 -->
     <el-dialog title="处理反馈" v-model="dialogVisible" width="400px">
       <el-descriptions :column="1" border>
+        <el-descriptions-item label="设备编号">{{detail.deviceCode}}</el-descriptions-item>
         <el-descriptions-item label="设备名称">{{detail.deviceName}}</el-descriptions-item>
         <el-descriptions-item label="型号">{{detail.deviceModel}}</el-descriptions-item>
         <el-descriptions-item label="问题">{{detail.deviceProblem}}</el-descriptions-item>
+        <el-descriptions-item label="反馈人">{{detail.userName}}</el-descriptions-item>
       </el-descriptions>
       <el-radio-group v-model="handleStatus" style="margin:16px 0">
         <el-radio :value="2">已处理</el-radio>
