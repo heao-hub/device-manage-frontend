@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Layout from '../layout/Layout.vue';
 import Login from '../views/login/Login.vue';
+import Register from '../views/login/Register.vue';
 import Home from '../views/home/Home.vue';
 import UserManage from '../views/user/UserManage.vue';
 import DeviceManage from '../views/device/DeviceManage.vue';
@@ -18,23 +19,29 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login,
-    meta: { public: true }
+    meta: { public: true, title: '登录 - 设备预约管理系统' }
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: Register,
+    meta: { public: true, title: '注册 - 设备预约管理系统' }
   },
   {
     path: '/',
     component: Layout,
     children: [
-      { path: '', name: 'Home', component: Home, meta: { roles: [1, 2] } },
-      { path: 'user', name: 'UserManage', component: UserManage, meta: { roles: [1] } },
-      { path: 'device', name: 'DeviceManage', component: DeviceManage, meta: { roles: [1] } },
-      { path: 'borrow/apply', name: 'BorrowApply', component: BorrowApply, meta: { roles: [2, 1] } },
-      { path: 'borrow/return', name: 'BorrowReturn', component: BorrowReturn, meta: { roles: [2, 1] } },
-      { path: 'feedback', name: 'Feedback', component: Feedback, meta: { roles: [2, 1] } },
-      { path: 'order/borrow', name: 'BorrowOrder', component: BorrowOrder, meta: { roles: [1] } },
-      { path: 'order/feedback', name: 'FeedbackOrder', component: FeedbackOrder, meta: { roles: [1] } },
-      { path: 'order/insert', name: 'InsertOrder', component: InsertOrder, meta: { roles: [1] } },
-      { path: 'order/scrap', name: 'ScrapOrder', component: ScrapOrder, meta: { roles: [1] } },
-      { path: 'order/statistics', name: 'Statistics', component: Statistics, meta: { roles: [1] } },
+      { path: '', name: 'Home', component: Home, meta: { roles: [1, 2], title: '首页 - 设备预约管理系统' } },
+      { path: 'user', name: 'UserManage', component: UserManage, meta: { roles: [1], title: '用户管理' } },
+      { path: 'device', name: 'DeviceManage', component: DeviceManage, meta: { roles: [1], title: '设备管理' } },
+      { path: 'borrow/apply', name: 'BorrowApply', component: BorrowApply, meta: { roles: [2, 1], title: '预约设备' } },
+      { path: 'borrow/return', name: 'BorrowReturn', component: BorrowReturn, meta: { roles: [2, 1], title: '我的预约' } },
+      { path: 'feedback', name: 'Feedback', component: Feedback, meta: { roles: [2, 1], title: '设备反馈' } },
+      { path: 'order/borrow', name: 'BorrowOrder', component: BorrowOrder, meta: { roles: [1], title: '预约单管理' } },
+      { path: 'order/feedback', name: 'FeedbackOrder', component: FeedbackOrder, meta: { roles: [1], title: '反馈表管理' } },
+      { path: 'order/insert', name: 'InsertOrder', component: InsertOrder, meta: { roles: [1], title: '入库单管理' } },
+      { path: 'order/scrap', name: 'ScrapOrder', component: ScrapOrder, meta: { roles: [1], title: '报废单管理' } },
+      { path: 'order/statistics', name: 'Statistics', component: Statistics, meta: { roles: [1], title: '数据统计' } },
     ]
   },
 ];

@@ -34,8 +34,8 @@
           </el-col>
           <el-col :span="6">
             <div class="search-buttons">
-              <el-button type="primary" @click="fetchFeedbacks" icon="Search" style="text-align: center;">查询</el-button>
-              <el-button @click="resetSearch" style="text-align: center;">重置</el-button>
+              <el-button type="primary" @click="fetchFeedbacks" icon="Search">查询</el-button>
+              <el-button @click="resetSearch">重置</el-button>
             </div>
           </el-col>
         </el-row>
@@ -98,7 +98,6 @@
               type="primary" 
               @click="openDeviceSelect" 
               icon="Plus"
-              style="text-align: center;"
             >选择设备</el-button>
             
             <div class="selected-device" v-if="form.deviceName">

@@ -3,7 +3,7 @@
     <el-card class="search-card">
       <div class="search-header">
         <h2 class="page-title">设备管理</h2>
-        <el-button type="success" @click="openAdd" icon="Plus" style="text-align: center;">设备入库</el-button>
+        <el-button type="success" @click="openAdd" icon="Plus">设备入库</el-button>
       </div>
       
       <div class="search-form">
@@ -28,12 +28,13 @@
               <el-option label="借出" :value="2" />
               <el-option label="维修中" :value="3" />
               <el-option label="报废" :value="4" />
+              <el-option label="已预约" :value="5" />
             </el-select>
           </el-col>
           <el-col :span="8">
             <div class="search-buttons">
-              <el-button type="primary" @click="fetchDevices" icon="Search" style="text-align: center;">查询</el-button>
-              <el-button @click="resetSearch" style="text-align: center;">重置</el-button>
+              <el-button type="primary" @click="fetchDevices" icon="Search">查询</el-button>
+              <el-button @click="resetSearch">重置</el-button>
             </div>
           </el-col>
         </el-row>
@@ -304,12 +305,15 @@ const rules = {
   deptId: [{ required: true, message: '请选择单位', trigger: 'change' }],
 };
 
+// 设备状态常量（严格按接口文档）
+// 1-正常可用 2-借出 3-维修中 4-报废 5-已预约
 function statusFmt(row) {
   switch (row.status) {
     case 1: return '正常可用';
     case 2: return '借出';
     case 3: return '维修中';
     case 4: return '报废';
+    case 5: return '已预约';
     default: return '-';
   }
 }
@@ -317,10 +321,11 @@ function statusFmt(row) {
 function getStatusTagType(status) {
   switch (status) {
     case 1: return 'success'; // 正常可用 - 绿色
-    case 2: return 'warning'; // 借出 - 橙色
-    case 3: return 'info';    // 维修中 - 蓝色
+    case 2: return 'primary'; // 借出 - 蓝色
+    case 3: return 'info';    // 维修中 - 灰色
     case 4: return 'danger';  // 报废 - 红色
-    default: return 'info';   // 默认 - 灰色
+    case 5: return 'warning'; // 已预约 - 橙色
+    default: return 'info';
   }
 }
 

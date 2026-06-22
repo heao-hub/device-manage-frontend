@@ -1,6 +1,6 @@
 import request from './request';
 
-// 借条管理
+// 预约单管理（旧接口，已被 reservation.js 替代）
 export const getBorrowOrderPage = (params) => request.get('/admin/orders/borrow/page', { params });
 export const handleBorrowOrder = (data) => request.put('/admin/orders/borrow/handle', data);
 // 反馈表管理
@@ -12,7 +12,7 @@ export const getInsertOrderPage = (params) => request.get('/admin/orders/insert/
 export const getScrapOrderPage = (params) => request.get('/admin/orders/scrap/page', { params });
 // 统计
 export const getInsertOrderStats = (params) => request.get('/admin/orders/statistics/insert', { params });
-export const getBorrowOrderStats = (params) => request.get('/admin/orders/statistics/borrow', { params });
+export const getBorrowOrderStats = (params) => request.get('/admin/orders/statistics/reservation', { params });
 export const getFeedbackOrderStats = (params) => request.get('/admin/orders/statistics/feedback', { params });
 export const getScrapOrderStats = (params) => request.get('/admin/orders/statistics/scrap', { params });
 

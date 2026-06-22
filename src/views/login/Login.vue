@@ -2,7 +2,7 @@
 <template>
   <div class="login-page">
     <el-card class="login-card">
-      <h2 style="text-align:center;margin-bottom:20px;">实验设备预约管理系统登录</h2>
+      <h2 style="text-align:center;margin-bottom:20px;">设备预约管理系统登录</h2>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
         <el-form-item label="账号" prop="username">
           <el-input v-model="form.username" placeholder="请输入账号" />
@@ -14,6 +14,10 @@
           <el-button type="primary" @click="onLogin" style="width:100%">登录</el-button>
         </el-form-item>
       </el-form>
+      <div class="login-footer">
+        <span>还没有账号？</span>
+        <el-link type="primary" :underline="false" @click="$router.push('/register')">立即注册</el-link>
+      </div>
     </el-card>
   </div>
 </template>
@@ -36,35 +40,50 @@ const onLogin = () => {
   formRef.value.validate(async (valid) => {
     if (!valid) return
     try {
-      console.log('Attempting login with:', form.value);
       const res = await apiLogin(form.value)
-      console.log('Login response:', res);
+      const resData = res.data
       
-      if (res.data && res.data.code === 1) { // 1 表示成功
-        console.log('Login successful, response data:', res.data);
+      // 兼容 code === 1 或 code === 200
+      if (resData && (resData.code === 1 || resData.code === 200)) {
+        const loginData = resData.data
         
-        // 先存储token
-        localStorage.setItem('app_token', res.data.data.token)
+        // 存储 token
+        localStorage.setItem('app_token', loginData.token)
         
-        // 获取用户信息并存储
-        const userRes = await getUserById(res.data.data.id)
-        console.log('User info response:', userRes);
-        localStorage.setItem('user_info', JSON.stringify(userRes.data.data))
+        // 尝试获取完整用户信息
+        let userInfo = null
+        try {
+          const userRes = await getUserById(loginData.id)
+          if (userRes.data && (userRes.data.code === 1 || userRes.data.code === 200)) {
+            userInfo = userRes.data.data
+          }
+        } catch (e) {
+          console.warn('获取用户信息失败，使用登录返回的数据', e)
+        }
         
-        // 确保数据写入完成
-        await new Promise(resolve => setTimeout(resolve, 100))
+        // 如果 getUserById 失败，用登录接口返回的数据兜底
+        if (!userInfo) {
+          userInfo = {
+            id: loginData.id,
+            username: loginData.username || loginData.userName || form.value.username,
+            type: loginData.type || 2, // 默认为普通用户
+          }
+        }
+        
+        localStorage.setItem('user_info', JSON.stringify(userInfo))
         
         ElMessage.success('登录成功')
         
-        // 使用replace而不是push，避免浏览器后退按钮返回到登录页
-        router.replace('/')
+        // 使用 nextTick 确保 DOM 更新完成后再跳转
+        setTimeout(() => {
+          window.location.href = '/'
+        }, 100)
       } else {
-        console.log('Login failed, response data:', res.data);
-        ElMessage.error(res.data.msg || '登录失败 ')
+        ElMessage.error(resData?.msg || '登录失败')
       }
     } catch (e) {
-      console.error('Login error:', e);
-      ElMessage.error(e.msg || '登录异常')
+      console.error('Login error:', e)
+      ElMessage.error(e?.response?.data?.msg || '登录异常')
     }
   })
 }
@@ -76,11 +95,25 @@ const onLogin = () => {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: #f5f7fa;
+  background: url('../../assets/bg.jpg') no-repeat center center;
+  background-size: cover;
 }
 .login-card {
   width: 400px;
   padding: 40px 30px 20px 30px;
   box-shadow: 0 2px 12px #0000001a;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+}
+.login-footer {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 14px;
+  color: #606266;
+}
+.login-footer .el-link {
+  font-size: 14px;
+  font-weight: 500;
 }
 </style>

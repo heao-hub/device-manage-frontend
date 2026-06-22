@@ -1,9 +1,9 @@
 <template>
-  <div class="borrow-apply">
+  <div class="reservation-apply">
     <el-card class="search-card">
       <div class="search-header">
-        <h2 class="page-title">借用申请记录</h2>
-        <el-button type="success" @click="openBorrow" icon="Plus" style="text-align: center;">借用设备</el-button>
+        <h2 class="page-title">预约申请记录</h2>
+        <el-button type="success" @click="openReserve" icon="Plus">预约设备</el-button>
       </div>
       
       <div class="search-form">
@@ -11,29 +11,34 @@
           <el-col :span="6">
             <el-select 
               v-model="searchForm.status" 
-              placeholder="请选择申请状态" 
+              placeholder="预约状态" 
               clearable 
               filterable
+              style="width: 100%;"
             >
               <el-option label="待审核" :value="1" />
-              <el-option label="审核通过" :value="2" />
-              <el-option label="审核不通过" :value="3" />
+              <el-option label="已通过" :value="2" />
+              <el-option label="已拒绝" :value="3" />
+              <el-option label="已完成" :value="4" />
+              <el-option label="已取消" :value="5" />
+              <el-option label="超时失效" :value="6" />
             </el-select>
           </el-col>
           <el-col :span="12">
             <el-date-picker 
               v-model="searchForm.timeRange" 
-              type="daterange" 
+              type="datetimerange" 
               range-separator="至" 
-              start-placeholder="开始日期" 
-              end-placeholder="结束日期" 
+              start-placeholder="开始时间" 
+              end-placeholder="结束时间"
+              value-format="YYYY-MM-DD HH:mm:ss"
               style="width: 100%;"
             />
           </el-col>
           <el-col :span="6">
             <div class="search-buttons">
-              <el-button type="primary" @click="fetchOrders" icon="Search" style="text-align: center;">查询</el-button>
-              <el-button @click="resetSearch" style="text-align: center;">重置</el-button>
+              <el-button type="primary" @click="fetchOrders" icon="Search">查询</el-button>
+              <el-button @click="resetSearch">重置</el-button>
             </div>
           </el-col>
         </el-row>
@@ -49,19 +54,36 @@
         v-loading="loading"
         element-loading-text="加载中..."
       >
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="code" label="借条编号" width="150" />
-        <el-table-column prop="description" label="借用说明" />
-        <el-table-column prop="status" label="状态" width="120">
+        <el-table-column prop="code" label="预约单号" width="170" />
+        <el-table-column prop="description" label="预约说明" />
+        <el-table-column label="预约时段" width="230">
           <template #default="{row}">
-            <el-tag :type="getStatusTagType(row.status)">{{ statusFmt(row) }}</el-tag>
+            <span class="time-slot-text">
+              {{ formatDateTime(row.startTime) }}
+            </span>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="申请时间" width="180" />
-        <el-table-column prop="handleTime" label="审批时间" width="180" />
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column prop="status" label="状态" width="110">
           <template #default="{row}">
-            <el-button size="small" @click="viewDetail(row)">详情</el-button>
+            <el-tag :type="getStatusTagType(row.status)" effect="light">
+              {{ statusFmt(row) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="申请时间" width="170" />
+        <el-table-column prop="handleTime" label="审批时间" width="170" />
+        <el-table-column label="操作" width="140" fixed="right">
+          <template #default="{row}">
+            <div class="row-actions">
+              <el-button size="small" @click="viewDetail(row)" type="primary" link>详情</el-button>
+              <el-button 
+                v-if="row.status === 1"
+                size="small" 
+                type="danger" 
+                link
+                @click="doCancel(row)"
+              >取消</el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -80,28 +102,73 @@
       </div>
     </el-card>
 
-    <!-- 借用设备弹窗 -->
+    <!-- 预约设备弹窗 -->
     <el-dialog 
-      title="借用设备" 
+      title="预约设备" 
       v-model="dialogVisible" 
-      width="700px"
+      width="720px"
       :before-close="handleDialogClose"
+      destroy-on-close
     >
       <el-form 
         :model="form" 
         label-width="100px" 
         ref="formRef"
+        :rules="formRules"
         @submit.prevent="submitForm"
       >
-        <el-form-item label="借用说明" prop="description">
+        <el-form-item label="预约说明" prop="description">
           <el-input 
             v-model="form.description" 
             type="textarea" 
             :rows="3"
-            placeholder="请输入借用说明"
+            placeholder="请简要说明预约用途"
             maxlength="200"
             show-word-limit
           />
+        </el-form-item>
+
+        <el-form-item label="预约日期" prop="reserveDate" required>
+          <el-date-picker
+            v-model="form.reserveDate"
+            type="date"
+            placeholder="选择预约日期"
+            :disabled-date="disablePastDate"
+            style="width: 100%;"
+            @change="onDateChange"
+          />
+        </el-form-item>
+
+        <el-form-item label="预约时段" prop="timeSlot" required>
+          <div class="time-slot-picker">
+            <div 
+              v-for="slot in timeSlots" 
+              :key="slot.value"
+              class="slot-item"
+              :class="{ 
+                'slot-selected': form.timeSlot === slot.value, 
+                'slot-disabled': slot.disabled 
+              }"
+              @click="selectSlot(slot)"
+            >
+              <div class="slot-time">{{ slot.label }}</div>
+              <div class="slot-status" v-if="slot.disabled">
+                <el-tag size="small" type="danger" effect="plain">已占用</el-tag>
+              </div>
+              <div class="slot-status" v-else-if="form.timeSlot === slot.value">
+                <el-tag size="small" type="success" effect="plain">已选</el-tag>
+              </div>
+              <div class="slot-status" v-else>
+                <el-tag size="small" type="success" effect="plain">可预约</el-tag>
+              </div>
+            </div>
+          </div>
+          <div class="slot-hint" v-if="!form.reserveDate">
+            <el-text type="info" size="small">请先选择预约日期，再选择时间段</el-text>
+          </div>
+          <div class="slot-hint" v-else-if="timeSlots.length === 0">
+            <el-text type="warning" size="small">暂无可用时间段</el-text>
+          </div>
         </el-form-item>
         
         <el-form-item label="选择设备" required>
@@ -148,8 +215,8 @@
             type="primary" 
             @click="submitForm" 
             :loading="submitLoading"
-            :disabled="!form.devices.length"
-          >{{ submitLoading ? '提交中...' : '确定申请' }}</el-button>
+            :disabled="!form.devices.length || !form.timeSlot"
+          >{{ submitLoading ? '提交中...' : '确定预约' }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -221,25 +288,34 @@
     
     <!-- 详情弹窗 -->
     <el-dialog 
-      title="借条详情" 
+      title="预约详情" 
       v-model="detailDialogVisible" 
-      width="600px"
+      width="650px"
     >
-      <el-descriptions :column="1" border>
-        <el-descriptions-item label="借条编号">{{detailData.code}}</el-descriptions-item>
-        <el-descriptions-item label="借用说明">{{detailData.description}}</el-descriptions-item>
-        <el-descriptions-item label="状态">{{statusFmt(detailData)}}</el-descriptions-item>
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="预约单号">{{detailData.code}}</el-descriptions-item>
+        <el-descriptions-item label="状态">
+          <el-tag :type="getStatusTagType(detailData.status)" effect="light">{{statusFmt(detailData)}}</el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="预约说明" :span="2">{{detailData.description || '-'}}</el-descriptions-item>
+        <el-descriptions-item label="开始时间">{{formatDateTime(detailData.startTime)}}</el-descriptions-item>
+        <el-descriptions-item label="结束时间">{{formatDateTime(detailData.endTime)}}</el-descriptions-item>
+        <el-descriptions-item label="预约人">{{detailData.userName}}</el-descriptions-item>
+        <el-descriptions-item label="所属单位">{{detailData.userDeptName || '-'}}</el-descriptions-item>
         <el-descriptions-item label="申请时间">{{detailData.createTime}}</el-descriptions-item>
-        <el-descriptions-item label="审批时间">{{detailData.handleTime}}</el-descriptions-item>
+        <el-descriptions-item label="审批时间">{{detailData.handleTime || '-'}}</el-descriptions-item>
+        <el-descriptions-item label="审批人" :span="2">{{detailData.adminName || '-'}}</el-descriptions-item>
       </el-descriptions>
       
       <el-card style="margin-top: 20px;" v-if="detailDevices.length > 0">
         <template #header>
-          <span>借用设备列表</span>
+          <span>预约设备列表</span>
         </template>
         <el-table :data="detailDevices" border stripe>
-          <el-table-column prop="code" label="设备编号" />
+          <el-table-column prop="deviceCode" label="设备编号" />
           <el-table-column prop="deviceName" label="设备名称" />
+          <el-table-column prop="deviceModel" label="设备型号" />
+          <el-table-column prop="deviceDeptName" label="所属单位" />
         </el-table>
       </el-card>
       
@@ -253,7 +329,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { getUserBorrowOrders, borrowDevices, getBorrowOrderDevices } from '../../api/borrow';
+import { applyReservation, getMyReservations, getReservationDevices, cancelReservation } from '../../api/reservation';
 import { getDevicePage } from '../../api/device';
 
 // 引入图标
@@ -271,35 +347,87 @@ const detailDialogVisible = ref(false);
 const detailData = ref({});
 const detailDevices = ref([]);
 
+// 时间段选项（固定时间段列表）
+const TIME_SLOT_LIST = [
+  { value: '1', label: '08:00 - 10:00', start: '08:00', end: '10:00' },
+  { value: '2', label: '10:00 - 12:00', start: '10:00', end: '12:00' },
+  { value: '3', label: '13:00 - 15:00', start: '13:00', end: '15:00' },
+  { value: '4', label: '15:00 - 17:00', start: '15:00', end: '17:00' },
+  { value: '5', label: '17:00 - 19:00', start: '17:00', end: '19:00' },
+  { value: '6', label: '19:00 - 21:00', start: '19:00', end: '21:00' },
+];
+const timeSlots = ref([]);
+
+// 预约状态常量（严格按接口文档）
+// 1-待审核 2-已通过 3-已拒绝 4-已完成 5-已取消 6-超时失效
+function statusFmt(row) {
+  switch (row.status) {
+    case 1: return '待审核';
+    case 2: return '已通过';
+    case 3: return '已拒绝';
+    case 4: return '已完成';
+    case 5: return '已取消';
+    case 6: return '超时失效';
+    default: return '-';
+  }
+}
+
+function getStatusTagType(status) {
+  switch (status) {
+    case 1: return 'warning';  // 待审核 - 橙色
+    case 2: return 'success';  // 已通过 - 绿色
+    case 3: return 'danger';   // 已拒绝 - 红色
+    case 4: return 'info';     // 已完成 - 灰色
+    case 5: return 'info';     // 已取消 - 灰色
+    case 6: return 'danger';   // 超时失效 - 红色
+    default: return 'info';
+  }
+}
+
+// 格式化 ISO 时间为可读格式
+function formatDateTime(isoStr) {
+  if (!isoStr) return '-';
+  try {
+    // 支持 "2026-06-23T09:00:00" 格式
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return isoStr;
+    const Y = d.getFullYear();
+    const M = String(d.getMonth() + 1).padStart(2, '0');
+    const D = String(d.getDate()).padStart(2, '0');
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    return `${Y}-${M}-${D} ${h}:${m}`;
+  } catch {
+    return isoStr;
+  }
+}
+
 const fetchOrders = async () => {
   loading.value = true;
   try {
-    // 构建参数对象，只包含非空值的参数
-    const params = {};
-    params.page = page.page;
-    params.pageSize = page.pageSize;
-    params.userId = getUserId();
+    const params = {
+      page: page.page,
+      pageSize: page.pageSize,
+    };
     
     if (searchForm.status !== null && searchForm.status !== undefined) {
       params.status = searchForm.status;
     }
     
     if (searchForm.timeRange?.[0]) {
-      // 传递日期格式 yyyy-MM-dd，确保不是ISO格式
-      params.beginTime = formatDate(searchForm.timeRange[0]);
+      params.beginTime = searchForm.timeRange[0];
     }
     
     if (searchForm.timeRange?.[1]) {
-      // 传递日期格式 yyyy-MM-dd，确保不是ISO格式
-      params.endTime = formatDate(searchForm.timeRange[1]);
+      params.endTime = searchForm.timeRange[1];
     }
-    const res = await getUserBorrowOrders(params);
+    const res = await getMyReservations(params);
     if (res.data && res.data.code === 1) {
       orders.value = res.data.data.records;
       page.total = res.data.data.total;
     }
   } catch (error) {
-    ElMessage.error('获取申请记录失败');
+    ElMessage.error('获取预约记录失败');
   } finally {
     loading.value = false;
   }
@@ -319,33 +447,13 @@ const resetSearch = () => {
 
 onMounted(fetchOrders);
 
-function statusFmt(row) {
-  switch (row.status) {
-    case 1: return '待审核';
-    case 2: return '审核通过';
-    case 3: return '审核不通过';
-    default: return '-';
-  }
-}
-
-function getStatusTagType(status) {
-  switch (status) {
-    case 1: return 'warning'; // 待审核 - 橙色
-    case 2: return 'success'; // 审核通过 - 绿色
-    case 3: return 'danger';  // 审核不通过 - 红色
-    default: return 'info';   // 默认 - 灰色
-  }
-}
-
 // 查看详情
 async function viewDetail(row) {
   detailData.value = { ...row };
   
-  // 获取借条下的设备信息
   try {
-    const res = await getBorrowOrderDevices(row.id);
+    const res = await getReservationDevices(row.id);
     if (res.data && res.data.code === 1) {
-      // API返回的是分页数据结构 {total: x, records: [...]}
       detailDevices.value = res.data.data?.records || [];
     } else {
       detailDevices.value = [];
@@ -358,24 +466,32 @@ async function viewDetail(row) {
   detailDialogVisible.value = true;
 }
 
-function getUserId() {
-  try {
-    return JSON.parse(localStorage.getItem('user_info'))?.id;
-  } catch {
-    return null;
-  }
+// 取消预约（调用 PUT /reservation/cancel/{id}）
+function doCancel(row) {
+  ElMessageBox.confirm('确定取消该预约申请？', '提示', { 
+    type: 'warning',
+    confirmButtonText: '确定取消',
+    cancelButtonText: '返回'
+  }).then(async () => {
+    try {
+      const res = await cancelReservation(row.id);
+      if (res.data && res.data.code === 1) {
+        ElMessage.success('预约已取消');
+        fetchOrders();
+      } else {
+        ElMessage.error(res.data?.msg || '取消失败');
+      }
+    } catch (error) {
+      ElMessage.error('取消失败');
+    }
+  }).catch(() => {});
 }
 
-// 格式化日期为 yyyy-MM-dd 格式，避免ISO格式
 function formatDate(date) {
   if (!date) return null;
-  
-  // 如果已经是字符串格式的日期，直接返回
   if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
     return date;
   }
-  
-  // 如果是Date对象或其他格式，转换为 yyyy-MM-dd
   const d = new Date(date);
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -383,13 +499,27 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-// 借用设备弹窗
+// ============ 预约设备弹窗 ============
 const dialogVisible = ref(false);
-const form = reactive({ description: '', devices: [] });
+const form = reactive({ 
+  description: '', 
+  devices: [], 
+  reserveDate: null,
+  timeSlot: null,
+  startTime: '',
+  endTime: ''
+});
 const formRef = ref();
-function openBorrow() {
+const formRules = {};
+
+function openReserve() {
   form.description = '';
   form.devices = [];
+  form.reserveDate = null;
+  form.timeSlot = null;
+  form.startTime = '';
+  form.endTime = '';
+  timeSlots.value = [];
   dialogVisible.value = true;
 }
 
@@ -400,10 +530,59 @@ const handleDialogClose = (done) => {
     type: 'warning',
   }).then(() => {
     done();
-  }).catch(() => {
-    // 取消关闭
-  });
+  }).catch(() => {});
 };
+
+// 日期变化时刷新时间段，如果是今天则禁用已过期的时段
+function onDateChange() {
+  form.timeSlot = null;
+  form.startTime = '';
+  form.endTime = '';
+  
+  // 判断选择的日期是否是今天
+  const selectedDate = form.reserveDate ? new Date(form.reserveDate) : null;
+  const today = new Date();
+  const isToday = selectedDate && 
+    selectedDate.getFullYear() === today.getFullYear() &&
+    selectedDate.getMonth() === today.getMonth() &&
+    selectedDate.getDate() === today.getDate();
+  
+  // 获取当前时间的小时和分钟
+  const currentHours = today.getHours();
+  const currentMinutes = today.getMinutes();
+  const currentTimeValue = currentHours * 60 + currentMinutes; // 转换为分钟数便于比较
+  
+  timeSlots.value = TIME_SLOT_LIST.map(slot => {
+    let disabled = false;
+    
+    if (isToday) {
+      // 解析时段的开始时间（格式如 "08:00"）
+      const [startHour, startMin] = slot.start.split(':').map(Number);
+      const slotStartValue = startHour * 60 + startMin;
+      
+      // 如果时段开始时间早于或等于当前时间，则禁用该时段
+      if (slotStartValue <= currentTimeValue) {
+        disabled = true;
+      }
+    }
+    
+    return { ...slot, disabled };
+  });
+}
+
+function selectSlot(slot) {
+  if (slot.disabled) return;
+  form.timeSlot = slot.value;
+  form.startTime = slot.start;
+  form.endTime = slot.end;
+}
+
+// 禁止选过去日期
+function disablePastDate(date) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return date.getTime() < today.getTime();
+}
 
 const handleDeviceDialogClose = (done) => {
   ElMessageBox.confirm('确认关闭设备选择对话框吗？', '提示', {
@@ -412,48 +591,58 @@ const handleDeviceDialogClose = (done) => {
     type: 'warning',
   }).then(() => {
     done();
-  }).catch(() => {
-    // 取消关闭
-  });
+  }).catch(() => {});
 };
+
 function removeDevice(d) {
   form.devices = form.devices.filter(item => item.id !== d.id);
 }
+
+// 提交预约申请（调用 POST /reservation/apply）
 async function submitForm() {
   if (!form.devices.length) return ElMessage.warning('请选择设备');
+  if (!form.reserveDate) return ElMessage.warning('请选择预约日期');
+  if (!form.timeSlot) return ElMessage.warning('请选择预约时段');
   
   submitLoading.value = true;
   try {
+    // 构造 yyyy-MM-dd HH:mm:ss 格式的 startTime 和 endTime
+    const dateStr = formatDate(form.reserveDate);
+    const startTime = `${dateStr} ${form.startTime}:00`;
+    const endTime = `${dateStr} ${form.endTime}:00`;
+
     const data = {
-      userId: getUserId(),
-      devices: form.devices.map(d => ({ id: d.id, code: d.code, name: d.deviceName, model: d.deviceModel })),
-      status: 1,
       description: form.description,
+      startTime,
+      endTime,
+      deviceIds: form.devices.map(d => d.id),
     };
-    const res = await borrowDevices(data);
+    const res = await applyReservation(data);
     if (res.data && res.data.code === 1) {
-      ElMessage.success('申请成功');
+      ElMessage.success('预约申请成功');
       dialogVisible.value = false;
       fetchOrders();
     } else {
       ElMessage.error(res.data?.msg || '申请失败');
     }
   } catch (error) {
-    ElMessage.error('申请失败');
+    ElMessage.error(error?.response?.data?.msg || '申请失败');
   } finally {
     submitLoading.value = false;
   }
 }
 
-// 设备选择弹窗
+// ============ 设备选择弹窗 ============
 const deviceDialog = ref(false);
 const deviceList = ref([]);
 const devicePage = reactive({ page: 1, pageSize: 8, total: 0 });
 const deviceSearch = ref('');
+
 function openDeviceSelect() {
   deviceDialog.value = true;
   fetchDevices();
 }
+
 const handleDevicePageSizeChange = (val) => {
   devicePage.pageSize = val;
   fetchDevices();
@@ -466,7 +655,7 @@ const fetchDevices = async () => {
       page: devicePage.page,
       pageSize: devicePage.pageSize,
       deviceName: deviceSearch.value,
-      deviceStatus: 1,
+      deviceStatus: 1, // 只显示正常可用的设备
     };
     const res = await getDevicePage(params);
     if (res.data && res.data.code === 1) {
@@ -479,6 +668,7 @@ const fetchDevices = async () => {
     deviceLoading.value = false;
   }
 };
+
 function isDeviceSelected(deviceId) {
   return form.devices.some(d => d.id === deviceId);
 }
@@ -494,14 +684,14 @@ function addDevice(row) {
 </script>
 
 <style scoped>
-.borrow-apply {
+.reservation-apply {
   padding: 20px;
 }
 
 .search-card {
   margin-bottom: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.08);
 }
 
 .search-header {
@@ -513,13 +703,13 @@ function addDevice(row) {
 
 .page-title {
   margin: 0;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   color: #303133;
 }
 
 .search-form {
-  padding: 20px 0;
+  padding: 16px 0 4px 0;
 }
 
 .search-buttons {
@@ -529,7 +719,17 @@ function addDevice(row) {
 
 .table-card {
   border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.08);
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.time-slot-text {
+  font-size: 13px;
+  color: #606266;
 }
 
 .pagination-container {
@@ -544,7 +744,68 @@ function addDevice(row) {
   gap: 10px;
 }
 
-/* 借用设备弹窗样式 */
+/* ============ 时间段选择器 ============ */
+.time-slot-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.slot-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 8px;
+  border: 1.5px solid #dcdfe6;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fff;
+  gap: 6px;
+}
+
+.slot-item:hover:not(.slot-disabled) {
+  border-color: #409eff;
+  background: #f0f7ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.15);
+}
+
+.slot-selected {
+  border-color: #409eff !important;
+  background: #ecf5ff !important;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
+}
+
+.slot-disabled {
+  border-color: #f56c6c;
+  background: #fef0f0;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.slot-time {
+  font-size: 13px;
+  font-weight: 500;
+  color: #303133;
+}
+
+.slot-disabled .slot-time {
+  color: #f56c6c;
+  text-decoration: line-through;
+}
+
+.slot-status {
+  line-height: 1;
+}
+
+.slot-hint {
+  margin-top: 6px;
+}
+
+/* ============ 设备选择 ============ */
 .device-selection {
   width: 100%;
 }
@@ -573,15 +834,14 @@ function addDevice(row) {
   margin-top: 15px;
 }
 
-/* 设备选择弹窗样式 */
 .device-search {
   display: flex;
   justify-content: flex-start;
 }
 
-/* 响应式设计 */
+/* ============ 响应式 ============ */
 @media (max-width: 768px) {
-  .borrow-apply {
+  .reservation-apply {
     padding: 15px;
   }
   
@@ -602,6 +862,10 @@ function addDevice(row) {
   
   .search-buttons {
     justify-content: flex-end;
+  }
+
+  .time-slot-picker {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 </style>

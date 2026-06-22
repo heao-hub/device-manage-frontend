@@ -1,6 +1,6 @@
 <template>
   <div class="header-bar">
-    <div class="title">设备管理系统</div>
+    <div class="title">设备预约管理系统</div>
     <div class="user-info">
       <el-dropdown>
         <span class="el-dropdown-link">

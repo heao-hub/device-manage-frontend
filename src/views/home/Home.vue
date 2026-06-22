@@ -2,7 +2,7 @@
   <div class="home-page">
     <el-card class="home-card">
       <div class="home-header">
-        <h1 class="home-title">欢迎使用设备管理系统</h1>
+        <h1 class="home-title">欢迎使用设备预约管理系统</h1>
       </div>
       
       <div class="charts-container">
@@ -22,18 +22,26 @@
           <v-chart :option="pieOption" autoresize class="chart" />
         </div>
       </div>
+      
+      <div class="charts-container" style="margin-top: 30px;">
+        <div class="chart-wrapper bar-chart-wrapper">
+          <h2 class="chart-title">设备预约次数 TOP5</h2>
+          <v-chart :option="barOption" autoresize class="chart bar-chart" />
+        </div>
+      </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { getDeviceStats, getDeviceStatusStats } from '../../api/statistics';
+import { getDeviceStats, getDeviceStatusStats, getReservationStats } from '../../api/statistics';
 import VChart from 'vue-echarts';
 
 const days = ref(7);
 const lineOption = ref({});
 const pieOption = ref({});
+const barOption = ref({});
 
       async function fetchLine() {
         const end = new Date();
@@ -141,18 +149,84 @@ const pieOption = ref({});
               },
               data: [
                 { value: d.onUseDeviceCount, name: '正常可用' },
-                { value: d.outUseDeviceCount, name: '借出未归还' },
+                { value: d.outUseDeviceCount, name: '借出' },
                 { value: d.repairDeviceCount, name: '维修中' },
                 { value: d.scrapDeviceCount, name: '报废' },
+                { value: d.reservedDeviceCount, name: '已预约' },
               ],
             },
           ],
         };
       }
 
+      async function fetchBar() {
+        const res = await getReservationStats();
+        const list = res.data?.data || [];
+        // 按 successCount 降序排列，取前5
+        const sorted = list.sort((a, b) => b.successCount - a.successCount).slice(0, 5);
+        // 横向柱状图：从下到上排列（ECharts yAxis category 从下往上），所以 reverse
+        const names = sorted.map(item => item.deviceName).reverse();
+        const counts = sorted.map(item => item.successCount).reverse();
+
+        barOption.value = {
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' }
+          },
+          grid: {
+            left: '3%',
+            right: '10%',
+            bottom: '3%',
+            top: '10%',
+            containLabel: true
+          },
+          xAxis: {
+            type: 'value',
+            name: '预约次数',
+            nameTextStyle: { fontSize: 12, color: '#666' },
+            boundaryGap: [0, 0.01]
+          },
+          yAxis: {
+            type: 'category',
+            data: names,
+            axisLabel: {
+              fontSize: 13,
+              color: '#333'
+            }
+          },
+          series: [
+            {
+              name: '预约次数',
+              type: 'bar',
+              data: counts,
+              barWidth: 20,
+              itemStyle: {
+                color: {
+                  type: 'linear',
+                  x: 0, y: 0, x2: 1, y2: 0,
+                  colorStops: [
+                    { offset: 0, color: '#409eff' },
+                    { offset: 1, color: '#67c23a' }
+                  ]
+                },
+                borderRadius: [0, 4, 4, 0]
+              },
+              label: {
+                show: true,
+                position: 'right',
+                formatter: '{c} 次',
+                fontSize: 12,
+                color: '#606266'
+              }
+            }
+          ]
+        };
+      }
+
       onMounted(() => {
         fetchLine();
         fetchPie();
+        fetchBar();
       });
       </script>
 
@@ -215,6 +289,15 @@ const pieOption = ref({});
 .chart {
   height: 350px;
   width: 100%;
+}
+
+.bar-chart-wrapper {
+  max-width: 100%;
+  flex: 1;
+}
+
+.bar-chart {
+  height: 300px;
 }
 
 /* 响应式设计 */

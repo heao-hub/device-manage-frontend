@@ -2,6 +2,8 @@ import request from './request';
 
 // 登录
 export const login = (data) => request.post('/user/login', data);
+// 注册
+export const register = (data) => request.post('/user/register', data);
 // 用户分页查询
 export const getUserPage = (params) => request.get('/user/page', { params });
 // 删除用户
@@ -21,6 +23,7 @@ export const getUserDept = () => request.get('/user/dept');
 
 export default {
 	login,
+	register,
 	getUserPage,
 	deleteUser,
 	addUser,

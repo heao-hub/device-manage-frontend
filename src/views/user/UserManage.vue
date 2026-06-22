@@ -3,7 +3,7 @@
     <el-card class="search-card">
       <div class="search-header">
         <h2 class="page-title">用户管理</h2>
-        <el-button type="success" @click="openAdd" icon="Plus" style="text-align: center;">添加用户</el-button>
+        <el-button type="success" @click="openAdd" icon="Plus">添加用户</el-button>
       </div>
       
       <div class="search-form">
@@ -34,8 +34,8 @@
           </el-col>
           <el-col :span="8">
             <div class="search-buttons">
-              <el-button type="primary" @click="fetchUsers" icon="Search" style="text-align: center;">查询</el-button>
-              <el-button @click="resetSearch" style="text-align: center;">重置</el-button>
+              <el-button type="primary" @click="fetchUsers" icon="Search">查询</el-button>
+              <el-button @click="resetSearch">重置</el-button>
             </div>
           </el-col>
         </el-row>

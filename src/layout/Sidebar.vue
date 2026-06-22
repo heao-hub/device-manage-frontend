@@ -17,21 +17,21 @@
       <el-icon><Cpu /></el-icon>
       <span>设备管理</span>
     </el-menu-item>
-    <!-- 四、借用/归还设备（所有用户可用） -->
+    <!-- 四、设备预约（所有用户可用） -->
     <el-sub-menu index="/borrow" popper-class="sidebar-submenu">
-      <template #title><el-icon><Edit /></el-icon><span>借用/归还设备</span></template>
-      <el-menu-item index="/borrow/apply">借用设备</el-menu-item>
-      <el-menu-item index="/borrow/return">归还设备</el-menu-item>
+      <template #title><el-icon><Calendar /></el-icon><span>设备预约</span></template>
+      <el-menu-item index="/borrow/apply">预约设备</el-menu-item>
+      <el-menu-item index="/borrow/return">我的预约</el-menu-item>
     </el-sub-menu>
-    <!-- 五、用户反馈 -->
+    <!-- 五、设备反馈 -->
     <el-menu-item index="/feedback">
       <el-icon><Message /></el-icon>
-      <span>用户反馈</span>
+      <span>设备反馈</span>
     </el-menu-item>
     <!-- 六、单据管理（管理员） -->
     <el-sub-menu index="/order" v-if="userType === 1" popper-class="sidebar-submenu">
       <template #title><el-icon><List /></el-icon><span>单据管理</span></template>
-      <el-menu-item index="/order/borrow">借条管理</el-menu-item>
+      <el-menu-item index="/order/borrow">预约单管理</el-menu-item>
       <el-menu-item index="/order/feedback">反馈表管理</el-menu-item>
       <el-menu-item index="/order/insert">入库单管理</el-menu-item>
       <el-menu-item index="/order/scrap">报废单管理</el-menu-item>
@@ -43,7 +43,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { HomeFilled, UserFilled, Cpu, List, Edit, Refresh, Message } from '@element-plus/icons-vue';
+import { HomeFilled, UserFilled, Cpu, List, Calendar, Message } from '@element-plus/icons-vue';
 const route = useRoute();
 const active = computed(() => route.path);
 const userType = computed(() => {

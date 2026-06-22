@@ -25,7 +25,7 @@
       <el-row :gutter="20">
         <el-col :span="6">
           <div class="summary-item">
-            <div class="summary-label">借条总数</div>
+            <div class="summary-label">预约单总数</div>
             <div class="summary-value">{{ summaryData.borrowTotal || 0 }}</div>
           </div>
         </el-col>
@@ -55,7 +55,7 @@
         <el-col :span="12">
           <el-card class="chart-card" shadow="hover">
             <div class="chart-header">
-              <h3 class="chart-title">借条统计</h3>
+              <h3 class="chart-title">预约单统计</h3>
             </div>
             <v-chart 
               :option="borrowOption" 
@@ -164,7 +164,7 @@ async function fetchAll() {
     ]);
     
     // 更新图表数据
-    borrowOption.value = makeLineOption('借条', borrow.data?.data);
+    borrowOption.value = makeLineOption('预约单', borrow.data?.data);
     feedbackOption.value = makeLineOption('反馈单', feedback.data?.data);
     insertOption.value = makeLineOption('入库单', insert.data?.data);
     scrapOption.value = makeLineOption('报废单', scrap.data?.data);
@@ -203,8 +203,8 @@ function makeLineOption(title, data) {
   if (!data) return {};
   
   const dateList = (data.dateList || '').split(',');
-  const newList = (data.newBorrowOrderList || data.newFeedbackOrderList || data.newInsertOrderList || data.newScrapOrderList || '').split(',').map(Number);
-  const totalList = (data.totalBorrowOrderList || data.totalFeedbackOrderList || data.totalInsertOrderList || data.totalScrapOrderList || '').split(',').map(Number);
+  const newList = (data.newReservationOrderList || data.newFeedbackOrderList || data.newInsertOrderList || data.newScrapOrderList || '').split(',').map(Number);
+  const totalList = (data.totalReservationOrderList || data.totalFeedbackOrderList || data.totalInsertOrderList || data.totalScrapOrderList || '').split(',').map(Number);
   
   return {
     title: { 
