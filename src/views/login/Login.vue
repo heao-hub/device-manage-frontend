@@ -2,7 +2,7 @@
 <template>
   <div class="login-page">
     <el-card class="login-card">
-      <h2 style="text-align:center;margin-bottom:20px;">设备管理系统登录</h2>
+      <h2 style="text-align:center;margin-bottom:20px;">实验设备预约管理系统登录</h2>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
         <el-form-item label="账号" prop="username">
           <el-input v-model="form.username" placeholder="请输入账号" />
