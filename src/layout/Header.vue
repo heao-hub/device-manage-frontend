@@ -52,4 +52,8 @@ function logout() {
 .user-info {
   font-size: 16px;
 }
+.user-info :deep(.el-dropdown-link),
+.user-info :deep(a) {
+  color: #fff;
+}
 </style>
