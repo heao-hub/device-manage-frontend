@@ -103,7 +103,7 @@ const page = reactive({ page: 1, pageSize: 10, total: 0 });
 const searchForm = reactive({ status: null, timeRange: [] });
 const reservationDevices = ref([]);
 
-// 预约状态常量（严格按接口文档）
+// 预约状态常量
 // 1-待审核 2-已通过 3-已拒绝 4-已完成 5-已取消 6-超时失效
 function statusFmt(row) {
   switch (row.status) {
@@ -119,17 +119,15 @@ function statusFmt(row) {
 
 function getStatusTagType(status) {
   switch (status) {
-    case 1: return 'warning';  // 待审核 - 橙色
-    case 2: return 'success';  // 已通过 - 绿色
-    case 3: return 'danger';   // 已拒绝 - 红色
-    case 4: return 'info';     // 已完成 - 灰色
-    case 5: return 'info';     // 已取消 - 灰色
-    case 6: return 'danger';   // 超时失效 - 红色
+    case 1: return 'warning';
+    case 2: return 'success';
+    case 3: return 'danger'; 
+    case 4: return 'info';   
+    case 5: return 'info';   
+    case 6: return 'danger'; 
     default: return 'info';
   }
 }
-
-// 格式化 ISO 时间为可读格式
 function formatDateTime(isoStr) {
   if (!isoStr) return '-';
   try {
@@ -202,7 +200,7 @@ async function openDetail(row) {
   dialogVisible.value = true;
 }
 
-// 管理员审批（调用 PUT /admin/orders/reservation/handle/{id}?status={status}）
+// 管理员审批
 async function handleOrder(status) {
   try {
     const res = await handleReservation(detail.value.id, status);

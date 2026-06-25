@@ -119,8 +119,6 @@ import { ref, reactive, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { getBorrowOrderStats, getFeedbackOrderStats, getInsertOrderStats, getScrapOrderStats } from '../../api/order';
 import VChart from 'vue-echarts';
-
-// 引入图标
 import { Refresh } from '@element-plus/icons-vue';
 
 const days = ref(7);
@@ -178,8 +176,8 @@ async function fetchAll() {
 
 function updateSummaryData(borrowData, feedbackData, insertData, scrapData) {
   // 获取最新的总数数据
-  if (borrowData?.totalBorrowOrderList) {
-    const borrowTotals = borrowData.totalBorrowOrderList.split(',');
+  if (borrowData?.totalReservationOrderList) {
+    const borrowTotals = borrowData.totalReservationOrderList.split(',');
     summaryData.borrowTotal = borrowTotals.length > 0 ? parseInt(borrowTotals[borrowTotals.length - 1]) || 0 : 0;
   }
   

@@ -166,8 +166,6 @@
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getUserPage, addUser, updateUser, updatePassword, deleteUser, getUserById, getUserDept } from '../../api/user';
-
-// 引入图标
 import { Plus, Search, Edit, Delete } from '@element-plus/icons-vue';
 
 const users = ref([]);
@@ -271,7 +269,6 @@ const handleDialogClose = (done) => {
   }).then(() => {
     done();
   }).catch(() => {
-    // 取消关闭
   });
 };
 
@@ -283,7 +280,6 @@ function submitForm() {
     try {
       let res;
       if (editMode.value) {
-        // 编辑模式下，如果密码为空则不更新密码
         const formData = { ...form };
         if (!formData.password) {
           delete formData.password;
@@ -346,7 +342,6 @@ const handlePasswordDialogClose = (done) => {
   }).then(() => {
     done();
   }).catch(() => {
-    // 取消关闭
   });
 };
 

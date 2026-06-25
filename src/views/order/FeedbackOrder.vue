@@ -100,11 +100,11 @@ function statusFmt(row) {
 
 function getStatusTagType(status) {
   switch (status) {
-    case 1: return 'warning'; // 未处理 - 橙色
-    case 2: return 'success'; // 已处理 - 绿色
-    case 3: return 'info';    // 维修 - 蓝色
-    case 4: return 'danger';  // 报废 - 红色
-    default: return 'info';   // 默认 - 灰色
+    case 1: return 'warning';
+    case 2: return 'success';
+    case 3: return 'info';   
+    case 4: return 'danger'; 
+    default: return 'info';  
   }
 }
 

@@ -164,7 +164,7 @@ const barOption = ref({});
         const list = res.data?.data || [];
         // 按 successCount 降序排列，取前5
         const sorted = list.sort((a, b) => b.successCount - a.successCount).slice(0, 5);
-        // 横向柱状图：从下到上排列（ECharts yAxis category 从下往上），所以 reverse
+        // 横向柱状图
         const names = sorted.map(item => item.deviceName).reverse();
         const counts = sorted.map(item => item.successCount).reverse();
 

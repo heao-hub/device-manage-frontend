@@ -332,7 +332,6 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { applyReservation, getMyReservations, getReservationDevices, cancelReservation } from '../../api/reservation';
 import { getDevicePage } from '../../api/device';
 
-// 引入图标
 import { Plus, Search } from '@element-plus/icons-vue';
 
 const orders = ref([]);
@@ -347,7 +346,7 @@ const detailDialogVisible = ref(false);
 const detailData = ref({});
 const detailDevices = ref([]);
 
-// 时间段选项（固定时间段列表）
+// 时间段选项
 const TIME_SLOT_LIST = [
   { value: '1', label: '08:00 - 10:00', start: '08:00', end: '10:00' },
   { value: '2', label: '10:00 - 12:00', start: '10:00', end: '12:00' },
@@ -358,7 +357,7 @@ const TIME_SLOT_LIST = [
 ];
 const timeSlots = ref([]);
 
-// 预约状态常量（严格按接口文档）
+// 预约状态常量
 // 1-待审核 2-已通过 3-已拒绝 4-已完成 5-已取消 6-超时失效
 function statusFmt(row) {
   switch (row.status) {
@@ -374,12 +373,12 @@ function statusFmt(row) {
 
 function getStatusTagType(status) {
   switch (status) {
-    case 1: return 'warning';  // 待审核 - 橙色
-    case 2: return 'success';  // 已通过 - 绿色
-    case 3: return 'danger';   // 已拒绝 - 红色
-    case 4: return 'info';     // 已完成 - 灰色
-    case 5: return 'info';     // 已取消 - 灰色
-    case 6: return 'danger';   // 超时失效 - 红色
+    case 1: return 'warning';  
+    case 2: return 'success';  
+    case 3: return 'danger'; 
+    case 4: return 'info';     
+    case 5: return 'info';   
+    case 6: return 'danger'; 
     default: return 'info';
   }
 }
@@ -388,7 +387,6 @@ function getStatusTagType(status) {
 function formatDateTime(isoStr) {
   if (!isoStr) return '-';
   try {
-    // 支持 "2026-06-23T09:00:00" 格式
     const d = new Date(isoStr);
     if (isNaN(d.getTime())) return isoStr;
     const Y = d.getFullYear();
@@ -466,7 +464,7 @@ async function viewDetail(row) {
   detailDialogVisible.value = true;
 }
 
-// 取消预约（调用 PUT /reservation/cancel/{id}）
+// 取消预约
 function doCancel(row) {
   ElMessageBox.confirm('确定取消该预约申请？', '提示', { 
     type: 'warning',
@@ -498,8 +496,6 @@ function formatDate(date) {
   const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
-
-// ============ 预约设备弹窗 ============
 const dialogVisible = ref(false);
 const form = reactive({ 
   description: '', 
@@ -533,7 +529,6 @@ const handleDialogClose = (done) => {
   }).catch(() => {});
 };
 
-// 日期变化时刷新时间段，如果是今天则禁用已过期的时段
 function onDateChange() {
   form.timeSlot = null;
   form.startTime = '';
@@ -546,21 +541,18 @@ function onDateChange() {
     selectedDate.getFullYear() === today.getFullYear() &&
     selectedDate.getMonth() === today.getMonth() &&
     selectedDate.getDate() === today.getDate();
-  
-  // 获取当前时间的小时和分钟
+
   const currentHours = today.getHours();
   const currentMinutes = today.getMinutes();
-  const currentTimeValue = currentHours * 60 + currentMinutes; // 转换为分钟数便于比较
+  const currentTimeValue = currentHours * 60 + currentMinutes;
   
   timeSlots.value = TIME_SLOT_LIST.map(slot => {
     let disabled = false;
     
     if (isToday) {
-      // 解析时段的开始时间（格式如 "08:00"）
       const [startHour, startMin] = slot.start.split(':').map(Number);
       const slotStartValue = startHour * 60 + startMin;
-      
-      // 如果时段开始时间早于或等于当前时间，则禁用该时段
+
       if (slotStartValue <= currentTimeValue) {
         disabled = true;
       }
@@ -598,7 +590,7 @@ function removeDevice(d) {
   form.devices = form.devices.filter(item => item.id !== d.id);
 }
 
-// 提交预约申请（调用 POST /reservation/apply）
+// 提交预约申请
 async function submitForm() {
   if (!form.devices.length) return ElMessage.warning('请选择设备');
   if (!form.reserveDate) return ElMessage.warning('请选择预约日期');
@@ -606,7 +598,6 @@ async function submitForm() {
   
   submitLoading.value = true;
   try {
-    // 构造 yyyy-MM-dd HH:mm:ss 格式的 startTime 和 endTime
     const dateStr = formatDate(form.reserveDate);
     const startTime = `${dateStr} ${form.startTime}:00`;
     const endTime = `${dateStr} ${form.endTime}:00`;
@@ -631,8 +622,6 @@ async function submitForm() {
     submitLoading.value = false;
   }
 }
-
-// ============ 设备选择弹窗 ============
 const deviceDialog = ref(false);
 const deviceList = ref([]);
 const devicePage = reactive({ page: 1, pageSize: 8, total: 0 });
@@ -743,8 +732,6 @@ function addDevice(row) {
   justify-content: flex-end;
   gap: 10px;
 }
-
-/* ============ 时间段选择器 ============ */
 .time-slot-picker {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -804,8 +791,6 @@ function addDevice(row) {
 .slot-hint {
   margin-top: 6px;
 }
-
-/* ============ 设备选择 ============ */
 .device-selection {
   width: 100%;
 }
@@ -839,7 +824,7 @@ function addDevice(row) {
   justify-content: flex-start;
 }
 
-/* ============ 响应式 ============ */
+
 @media (max-width: 768px) {
   .reservation-apply {
     padding: 15px;

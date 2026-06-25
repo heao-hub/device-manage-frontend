@@ -218,8 +218,6 @@
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getUserFeedbacks, submitFeedback } from '../../api/feedback';
-
-// 引入图标
 import { Plus, Search } from '@element-plus/icons-vue';
 
 const feedbacks = ref([]);
@@ -232,7 +230,7 @@ const searchForm = reactive({ status: null, timeRange: [] });
 const fetchFeedbacks = async () => {
   loading.value = true;
   try {
-    // 构建参数对象，只包含非空值的参数
+    // 构建参数对象
     const params = {};
     params.page = page.page;
     params.pageSize = page.pageSize;
@@ -243,12 +241,10 @@ const fetchFeedbacks = async () => {
     }
     
     if (searchForm.timeRange?.[0]) {
-      // 传递日期格式 yyyy-MM-dd，确保不是ISO格式
       params.beginTime = formatDate(searchForm.timeRange[0]);
     }
     
     if (searchForm.timeRange?.[1]) {
-      // 传递日期格式 yyyy-MM-dd，确保不是ISO格式
       params.endTime = formatDate(searchForm.timeRange[1]);
     }
     const res = await getUserFeedbacks(params);
@@ -289,11 +285,11 @@ function statusFmt(row) {
 
 function getStatusTagType(status) {
   switch (status) {
-    case 1: return 'warning'; // 未处理 - 橙色
-    case 2: return 'success'; // 已处理 - 绿色
-    case 3: return 'info';    // 维修 - 蓝色
-    case 4: return 'danger';  // 报废 - 红色
-    default: return 'info';   // 默认 - 灰色
+    case 1: return 'warning';
+    case 2: return 'success';
+    case 3: return 'info';   
+    case 4: return 'danger'; 
+    default: return 'info';  
   }
 }
 
@@ -305,16 +301,13 @@ function getUserId() {
   }
 }
 
-// 格式化日期为 yyyy-MM-dd 格式，避免ISO格式
 function formatDate(date) {
   if (!date) return null;
   
-  // 如果已经是字符串格式的日期，直接返回
   if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
     return date;
   }
   
-  // 如果是Date对象或其他格式，转换为 yyyy-MM-dd
   const d = new Date(date);
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -344,7 +337,6 @@ const handleDialogClose = (done) => {
   }).then(() => {
     done();
   }).catch(() => {
-    // 取消关闭
   });
 };
 
@@ -356,7 +348,6 @@ const handleDeviceDialogClose = (done) => {
   }).then(() => {
     done();
   }).catch(() => {
-    // 取消关闭
   });
 };
 
@@ -385,7 +376,7 @@ async function submitForm() {
   }
 }
 
-// 设备选择弹窗（可选所有设备）
+// 设备选择弹窗
 const deviceDialog = ref(false);
 const deviceList = ref([]);
 const devicePage = reactive({ page: 1, pageSize: 8, total: 0 });
@@ -414,7 +405,7 @@ const fetchDevices = async () => {
       deviceStatus: 1
     };
     const res = await getDevicePage(params);
-    if (res.data && res.data.code === 1) { // 1 表示成功
+    if (res.data && res.data.code === 1) {
       deviceList.value = res.data.data.records;
       devicePage.total = res.data.data.total;
     }

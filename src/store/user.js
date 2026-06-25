@@ -26,7 +26,7 @@ const mutations = {
 const actions = {
   async login({ commit }, payload) {
     const res = await apiLogin(payload);
-    if (res.data && res.data.code === 1) { // 1 表示成功
+    if (res.data && res.data.code === 1) {
       commit('setToken', res.data.data.token);
       commit('setInfo', res.data.data);
       return true;
@@ -40,7 +40,7 @@ const actions = {
   async fetchUserInfo({ commit, state }) {
     if (!state.info?.id) return;
     const res = await getUserById(state.info.id);
-    if (res.data && res.data.code === 1) { // 1 表示成功
+    if (res.data && res.data.code === 1) {
       commit('setInfo', res.data.data);
     }
   }

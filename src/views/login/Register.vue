@@ -97,7 +97,6 @@ const form = reactive({
   deptId: null,
 });
 
-// 确认密码自定义校验
 const validateConfirmPassword = (rule, value, callback) => {
   if (value !== form.password) {
     callback(new Error('两次输入的密码不一致'));
@@ -142,7 +141,6 @@ const onRegister = () => {
 
     loading.value = true;
     try {
-      // 按接口文档：username、password 必填，deptId 可选
       const data = {
         username: form.username,
         password: form.password,

@@ -234,8 +234,6 @@ import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getDevicePage, addDevice, updateDevice, getDeviceById, scrapDevice } from '../../api/device';
 import { getUserDept } from '../../api/user';
-
-// 引入图标
 import { Plus, Search, Edit, Delete, Tools } from '@element-plus/icons-vue';
 
 const devices = ref([]);
@@ -305,7 +303,7 @@ const rules = {
   deptId: [{ required: true, message: '请选择单位', trigger: 'change' }],
 };
 
-// 设备状态常量（严格按接口文档）
+// 设备状态常量
 // 1-正常可用 2-借出 3-维修中 4-报废 5-已预约
 function statusFmt(row) {
   switch (row.status) {
@@ -320,11 +318,11 @@ function statusFmt(row) {
 
 function getStatusTagType(status) {
   switch (status) {
-    case 1: return 'success'; // 正常可用 - 绿色
-    case 2: return 'primary'; // 借出 - 蓝色
-    case 3: return 'info';    // 维修中 - 灰色
-    case 4: return 'danger';  // 报废 - 红色
-    case 5: return 'warning'; // 已预约 - 橙色
+    case 1: return 'success';
+    case 2: return 'primary';
+    case 3: return 'info';   
+    case 4: return 'danger'; 
+    case 5: return 'warning';
     default: return 'info';
   }
 }
@@ -352,7 +350,6 @@ const handleDialogClose = (done) => {
   }).then(() => {
     done();
   }).catch(() => {
-    // 取消关闭
   });
 };
 
@@ -364,7 +361,6 @@ const handleScrapDialogClose = (done) => {
   }).then(() => {
     done();
   }).catch(() => {
-    // 取消关闭
   });
 };
 
@@ -377,7 +373,7 @@ function submitForm() {
       let res;
       if (editMode.value) {
         res = await updateDevice(form);
-        if (res.data && res.data.code === 1) { // 1 表示成功
+        if (res.data && res.data.code === 1) {
           ElMessage.success('修改成功');
           dialogVisible.value = false;
           fetchDevices();
@@ -386,7 +382,7 @@ function submitForm() {
         }
       } else {
         res = await addDevice({ ...form, adminId: getAdminId() });
-        if (res.data && res.data.code === 1) { // 1 表示成功
+        if (res.data && res.data.code === 1) {
           ElMessage.success('入库成功');
           dialogVisible.value = false;
           fetchDevices();
@@ -417,7 +413,7 @@ async function submitScrap() {
   scrapLoading.value = true;
   try {
     const res = await scrapDevice({ deviceId: scrapForm.deviceId, reason: scrapForm.reason, adminId: getAdminId() });
-    if (res.data && res.data.code === 1) { // 1 表示成功
+    if (res.data && res.data.code === 1) {
       ElMessage.success('报废成功');
       scrapDialog.value = false;
       fetchDevices();
@@ -443,7 +439,7 @@ async function repairDevice(row) {
   ElMessageBox.confirm('确定将该设备状态设为维修中？', '提示', { type: 'warning' })
     .then(async () => {
       const res = await updateDevice({ ...row, status: 3 });
-      if (res.data && res.data.code === 1) { // 1 表示成功
+      if (res.data && res.data.code === 1) {
         ElMessage.success('已设为维修中');
         fetchDevices();
       }

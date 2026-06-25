@@ -42,15 +42,11 @@ const onLogin = () => {
     try {
       const res = await apiLogin(form.value)
       const resData = res.data
-      
-      // 兼容 code === 1 或 code === 200
+
       if (resData && (resData.code === 1 || resData.code === 200)) {
         const loginData = resData.data
         
-        // 存储 token
         localStorage.setItem('app_token', loginData.token)
-        
-        // 尝试获取完整用户信息
         let userInfo = null
         try {
           const userRes = await getUserById(loginData.id)
@@ -61,12 +57,11 @@ const onLogin = () => {
           console.warn('获取用户信息失败，使用登录返回的数据', e)
         }
         
-        // 如果 getUserById 失败，用登录接口返回的数据兜底
         if (!userInfo) {
           userInfo = {
             id: loginData.id,
             username: loginData.username || loginData.userName || form.value.username,
-            type: loginData.type || 2, // 默认为普通用户
+            type: loginData.type || 2,
           }
         }
         
@@ -74,7 +69,6 @@ const onLogin = () => {
         
         ElMessage.success('登录成功')
         
-        // 使用 nextTick 确保 DOM 更新完成后再跳转
         setTimeout(() => {
           window.location.href = '/'
         }, 100)

@@ -156,8 +156,7 @@ const detailDialogVisible = ref(false);
 const detailData = ref({});
 const detailDevices = ref([]);
 
-// 预约状态常量（严格按接口文档）
-// 1-待审核 2-已通过 3-已拒绝 4-已完成 5-已取消 6-超时失效
+
 function statusFmt(row) {
   switch (row.status) {
     case 1: return '待审核';
@@ -172,12 +171,12 @@ function statusFmt(row) {
 
 function getStatusTagType(status) {
   switch (status) {
-    case 1: return 'warning';  // 待审核 - 橙色
-    case 2: return 'success';  // 已通过 - 绿色
-    case 3: return 'danger';   // 已拒绝 - 红色
-    case 4: return 'info';     // 已完成 - 灰色
-    case 5: return 'info';     // 已取消 - 灰色
-    case 6: return 'danger';   // 超时失效 - 红色
+    case 1: return 'warning';
+    case 2: return 'success';
+    case 3: return 'danger'; 
+    case 4: return 'info';   
+    case 5: return 'info';   
+    case 6: return 'danger'; 
     default: return 'info';
   }
 }
@@ -214,7 +213,7 @@ const fetchReservations = async () => {
     } else if (activeTab.value === 'done') {
       params.status = 4; // 已完成
     }
-    // userId 由后端从 JWT 中自动获取，无需前端传递
+
     const res = await getMyReservations(params);
     if (res.data && res.data.code === 1) {
       reservations.value = res.data.data.records;
@@ -253,7 +252,7 @@ async function viewDetail(row) {
   detailDialogVisible.value = true;
 }
 
-// 取消预约（调用 PUT /reservation/cancel/{id}，仅限待审核状态）
+// 取消预约
 function doCancel(row) {
   ElMessageBox.confirm('确定取消该预约申请？', '提示', { 
     type: 'warning',
@@ -274,7 +273,7 @@ function doCancel(row) {
   }).catch(() => {});
 }
 
-// 归还设备（调用 PUT /reservation/complete/{id}，状态为待审核或已通过时可归还）
+// 归还设备
 function doComplete(row) {
   ElMessageBox.confirm('确定归还该预约的设备？归还后预约状态将变为已完成。', '归还确认', { 
     type: 'warning',
@@ -283,7 +282,7 @@ function doComplete(row) {
   }).then(async () => {
     try {
       const res = await completeReservation(row.id);
-      // 接口成功返回 code: 200
+
       if (res.data && (res.data.code === 200 || res.data.code === 1)) {
         ElMessage.success('归还成功');
         fetchReservations();
